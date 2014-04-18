@@ -1,0 +1,192 @@
+/*
+ * [loan interest-rate and payments mapping] 
+ * Create a user interface, as shown below. 
+ * Let the user enter the loan amount and loan period in the number of years from a text field, 
+ * and it should display the monthly and total payments for each interest rate starting 
+ * 3.0 percent to 6.0 percent, with increments of 0.125 percent. 
+ * The text field for showing payments should be placed inside a scroll pane so that the user can see invisible parts of payments by operating the scroll bar.
+ * 
+ * */
+
+import java.awt.*;
+import java.awt.event.*;
+
+import javax.swing.*;
+
+public class LoanRatePay extends JFrame
+{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Create text fields
+
+	private JTextField jtfNumberOfYears = new JTextField();
+	private JTextField jtfLoanAmount = new JTextField();
+	private JButton jbtComputeLoan = new JButton("Show Table");
+
+	private JTextArea textArea = new JTextArea(7, 3);
+	private JScrollPane jspScroll = new JScrollPane(textArea);
+
+	public LoanRatePay()
+	{
+		// JPanel p1 to hold labels and text fields
+		JPanel p1 = new JPanel(new GridLayout(1, 3));
+
+		p1.add(new JLabel("Loan Amount"));
+		p1.add(jtfLoanAmount);
+		p1.add(new JLabel("Number of Years"));
+		p1.add(jtfNumberOfYears);
+		p1.add(jbtComputeLoan);
+		jbtComputeLoan.addActionListener(new ButtonListener());
+
+		// JScrollPane jspScroll to hold textArea
+		jspScroll
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+		add(p1, BorderLayout.NORTH);
+		add(jspScroll, BorderLayout.SOUTH);
+
+	}
+
+	public static void main(String[] args)
+	{
+		LoanRatePay frame = new LoanRatePay();
+		frame.pack();
+		frame.setTitle("LoanRatePay : [loan interest-rate and payments mapping] ");
+		frame.setLocationRelativeTo(null); // Center the frame
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+	}
+
+	/** Handle the Compute Payment button */
+	private class ButtonListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent e)
+		{
+			String Head = "Interest Rate" + "	" + "Monthly Payment" + "	"
+					+ "Total Payment\n";
+			String Content = "";
+			try
+			{
+				// Get values from text fields
+				int year = Integer.parseInt(jtfNumberOfYears.getText());
+				double loanAmount = Double.parseDouble(jtfLoanAmount.getText());
+
+				double interest1 = 3.00;
+				double interest2 = 6.00;
+				double increments = 0.125;
+
+				for (int i = 0; i < (int) (interest2 - interest1) / increments; i++)
+				{
+					double interest = interest1 + increments * i;
+
+					// Create a loan object
+					Loan loan = new Loan(interest, year, loanAmount);
+
+					// Display monthly payment and total payment
+					Content += interest + "	"
+							+ String.format("%.2f", loan.getMonthlyPayment())
+							+ "		"
+							+ String.format("%.2f", loan.getTotalPayment())
+							+ "\n";
+
+				}
+			} catch (Exception e1)
+			{
+				textArea.setText("Input Format Mismatch");
+			}
+			textArea.setText(Head + Content);
+		}
+	}
+
+	public class Loan
+	{
+		private double annualInterestRate;
+		private int numberOfYears;
+		private double loanAmount;
+		private java.util.Date loanDate;
+
+		/** Default constructor */
+		public Loan()
+		{
+			this(2.5, 1, 1000);
+		}
+
+		/**
+		 * Construct a loan with specified annual interest rate, number of
+		 * years, and loan amount
+		 */
+		public Loan(double annualInterestRate, int numberOfYears,
+				double loanAmount)
+		{
+			this.annualInterestRate = annualInterestRate;
+			this.numberOfYears = numberOfYears;
+			this.loanAmount = loanAmount;
+			loanDate = new java.util.Date();
+		}
+
+		/** Return annualInterestRate */
+		public double getAnnualInterestRate()
+		{
+			return annualInterestRate;
+		}
+
+		/** Set a new annualInterestRate */
+		public void setAnnualInterestRate(double annualInterestRate)
+		{
+			this.annualInterestRate = annualInterestRate;
+		}
+
+		/** Return numberOfYears */
+		public int getNumberOfYears()
+		{
+			return numberOfYears;
+		}
+
+		/** Set a new numberOfYears */
+		public void setNumberOfYears(int numberOfYears)
+		{
+			this.numberOfYears = numberOfYears;
+		}
+
+		/** Return loanAmount */
+		public double getLoanAmount()
+		{
+			return loanAmount;
+		}
+
+		/** Set a newloanAmount */
+		public void setLoanAmount(double loanAmount)
+		{
+			this.loanAmount = loanAmount;
+		}
+
+		/** Find monthly payment */
+		public double getMonthlyPayment()
+		{
+			double monthlyInterestRate = annualInterestRate / 1200;
+			double monthlyPayment = loanAmount
+					* monthlyInterestRate
+					/ (1 - (1 / Math.pow(1 + monthlyInterestRate,
+							numberOfYears * 12)));
+			return monthlyPayment;
+		}
+
+		/** Find total payment */
+		public double getTotalPayment()
+		{
+			double totalPayment = getMonthlyPayment() * numberOfYears * 12;
+			return totalPayment;
+		}
+
+		/** Return loan date */
+		public java.util.Date getLoanDate()
+		{
+			return loanDate;
+		}
+	}
+
+}
